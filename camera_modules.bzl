@@ -69,6 +69,15 @@ def _define_module(target, variant):
 
     if target == "parrot": deps.extend([])
 
+    # CamX FD on EVA binds synx v1 handles to cam_sync fences
+    synx_copts = []
+    if target == "waipio" and variant == "perf":
+        deps.extend([
+            "//vendor/qcom/opensource/synx-kernel:synx_v1_headers",
+            "//vendor/qcom/opensource/synx-kernel:{}_synx-driver_synx".format(tv),
+        ])
+        synx_copts = ["-DCONFIG_MSM_GLOBAL_SYNX=1"]
+
     ddk_module(
         name = "{}_camera".format(tv),
         out = "camera.ko",
@@ -284,7 +293,7 @@ def _define_module(target, variant):
         },
         copts = [
         "-D__NO_FORTIFY","-fstrict-flex-arrays=0",
-        "-include", "$(location :camera_banner)"],
+        "-include", "$(location :camera_banner)"] + synx_copts,
         deps = base_deps + sun_deps +deps,
         kconfig = "Kconfig",
         defconfig = "{}_defconfig_generated".format(tv),
