@@ -29,6 +29,12 @@ project_configs = select({
     ],
 })
 
+# Per-target extras for builds without a project flag
+target_configs = {
+    # CamX encodes snapshots on the JPEG HW
+    "waipio": ["CONFIG_SPECTRA_JPEG=y"],
+}
+
 """
 Return a label which defines a project-specific defconfig snippet to be
 applied on top of the platform defconfig.
@@ -40,7 +46,7 @@ def get_project_defconfig(target, variant):
     write_file(
         name = rule_name,
         out = "{}.generated".format(rule_name),
-        content = common_configs + project_configs + [""],
+        content = common_configs + project_configs + target_configs.get(target, []) + [""],
     )
 
     return rule_name
